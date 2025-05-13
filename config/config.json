@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "schulungsplanung-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/schulungsplanung/SchulungsplanungWebPart.js",
+          "manifest": "./src/webparts/schulungsplanung/SchulungsplanungWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "SchulungsplanungWebPartStrings": "lib/webparts/schulungsplanung/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
+  }
+}
