@@ -1,18 +1,12 @@
+// tslint:disable:export-name
 import {
-    Field,
-    FolderAddResult,
-    Item,
-    List,
-    ListItemFormUpdateValue,
-    PrincipalInfo,
-    PrincipalSource,
-    PrincipalType,
-    SiteUserProps,
-    sp,
-    Web
+    sp
 } from '@pnp/sp';
 import { IService } from './IService';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
+import { IPlanungsItem } from '../types/IPlanungsItem';
+import { Mapper } from './Mapper';
+import { ISpItem } from '../types/ISpItem';
 
 export class Service implements IService {
     constructor(context: WebPartContext) {
@@ -20,33 +14,59 @@ export class Service implements IService {
             {
                 spfxContext: context
             }
-        )
+        );
     }
-    public async writeListItem(listId: string, itemId: number, item: any): Promise<any> {
-        if (itemId && itemId > 0) {
+
+    public async writeListItem(listId: string, item: IPlanungsItem): Promise<boolean> {
+        const spItem: ISpItem = Mapper.PlanungToSp(item);
+        if (spItem.Id && spItem.Id > 0) {
             // Update existing item}
-            sp.web.lists.getById(listId).items.getById(itemId).update(item)
+            return sp.web.lists.getById(listId).items.getById(spItem.Id).update(spItem)
                 .then((result) => {
                     console.log('Item updated successfully', result);
+                    return true;
                 })
                 .catch((error) => {
                     console.error('Error updating item', error);
+                    return false;
                 });
-
         } else {
             // Create new item
-            sp.web.lists.getById(listId).items.add(item)
+            return sp.web.lists.getById(listId).items.add(spItem)
                 .then((result) => {
                     console.log('Item created successfully', result);
+                    return true;
                 })
                 .catch((error) => {
                     console.error('Error creating item', error);
+                    return false;
                 });
         }
     }
 
-    public async readListItem(listId: string, itemId: number): Promise<any> {
+    public async readListItem(listId: string, itemId: number): Promise<IPlanungsItem> {
         // Read item
-        return sp.web.lists.getById(listId).items.getById(itemId);
+        const item: ISpItem = await sp.web.lists
+            .getById(listId)
+            .items
+            .getById(itemId)
+            .get<ISpItem>();
+        if (item) {
+            const planungsItem: IPlanungsItem = Mapper.SpToPlanung(item);
+            return planungsItem;
+        } else {
+            return undefined;
+        }
+    }
+
+    public getEmptyItem(): IPlanungsItem {
+        return {
+            ende: undefined,
+            start: undefined,
+            id: undefined,
+            thema: '',
+            verpflegung: false,
+            verpflegungAnzahl: 0
+        };
     }
 }

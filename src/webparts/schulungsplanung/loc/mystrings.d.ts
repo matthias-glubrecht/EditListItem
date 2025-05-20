@@ -1,7 +1,7 @@
 declare interface ISchulungsplanungWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  ListFieldLabel: string;
 }
 
 declare module 'SchulungsplanungWebPartStrings' {

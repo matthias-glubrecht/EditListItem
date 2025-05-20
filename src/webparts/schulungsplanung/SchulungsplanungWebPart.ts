@@ -3,8 +3,7 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   BaseClientSideWebPart,
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  IPropertyPaneConfiguration
 } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'SchulungsplanungWebPartStrings';
@@ -22,6 +21,7 @@ export default class SchulungsplanungWebPart extends BaseClientSideWebPart<ISchu
     const element: React.ReactElement<ISchulungsplanungProps > = React.createElement(
       Schulungsplanung,
       {
+        context: this.context,
         listId: this.properties.listId
       }
     );
@@ -50,16 +50,17 @@ export default class SchulungsplanungWebPart extends BaseClientSideWebPart<ISchu
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyFieldListPicker('listId', {
-                  label: 'Schulungsliste',
+                  label: strings.ListFieldLabel,
                   selectedList: this.properties.listId,
                   includeHidden: false,
                   context: this.context,
-                  properties: this.context.propertyPane,
+                  properties: this.properties,
                   baseTemplate: 100,
                   deferredValidationTime: 500,
                   onPropertyChange: (propertyPath, oldValue, newValue) => {
                     this.render();
-                  }
+                  },
+                  key: 'listId'
                 })
               ]
             }
