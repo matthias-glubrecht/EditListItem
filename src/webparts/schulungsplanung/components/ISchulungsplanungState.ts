@@ -6,4 +6,8 @@ export interface ISchulungsplanungState {
     isLoading: boolean;
     isError: boolean;
     errorMessage: string;
+    errors: {
+        [key: string]: string;
+    };
+    isValid: boolean;
 }

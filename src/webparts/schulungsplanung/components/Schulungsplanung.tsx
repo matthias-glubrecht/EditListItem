@@ -8,23 +8,51 @@ import { Service } from '../service/service';
 import { ISchulungsplanungState } from './ISchulungsplanungState';
 import { IPlanungsItem } from '../types/IPlanungsItem';
 import { DateConvention, DateTimePicker } from '@pnp/spfx-controls-react';
+import { FormValidator } from '../service/validation/FormValidator';
+import { ValidationRules } from '../service/validation/ValidationRules';
 
 export default class Schulungsplanung extends React.Component<ISchulungsplanungProps, ISchulungsplanungState> {
   private _service: IService;
+  private _validator: FormValidator;
 
   constructor(props: ISchulungsplanungProps) {
     super(props);
 
     this._service = new Service(this.props.context);
 
+    this._validator = new FormValidator();
+
+    // Validierungsregeln definieren
+    this._validator.addRule('thema', ValidationRules.required('Thema ist ein Pflichtfeld'));
+    this._validator.addRule('start', ValidationRules.required('Startdatum ist erforderlich'));
+    this._validator.addRule('ende', ValidationRules.required('Enddatum ist erforderlich'));
+    this._validator.addRule('ende', ValidationRules.dateAfter('start', 'Enddatum muss nach Startdatum liegen'));
+    this._validator.addRule('verpflegungAnzahl', ValidationRules.requiredDependsOn('verpflegung', 'Wenn Verpflegung erforderlich ist, muss auch angegeben werden, wieviele Personen kommen'));
+
     this.state = {
       title: 'Initialisierung',
       isError: false,
-      errorMessage: '',
+      errors: {},
+      isValid: true,
       item: undefined,
-      isLoading: true
+      isLoading: true,
+      errorMessage: ''
     };
   }
+
+  private validateAndUpdate = (): void => {
+    const result = this._validator.validate();
+    this.setState({
+      errors: result.errors,
+      isValid: result.isValid
+    });
+  };
+
+  private onFieldChange = (fieldName: string, value: any): void => {
+    this._validator.setValue(fieldName, value);
+    this.setState({ [fieldName]: value } as any, this.validateAndUpdate);
+  };
+
 
   public async componentDidMount(): Promise<void> {
     await this.loadDataAndSetState();
@@ -144,7 +172,7 @@ export default class Schulungsplanung extends React.Component<ISchulungsplanungP
   }
 
   private saveItem = async (): Promise<void> => {
-    if (await this._service.writeListItem(this.props.listId, this.state.item)) {
+    if (await this._service.saveListItem(this.props.listId, this.state.item)) {
       this.setState({
         isError: false
       });

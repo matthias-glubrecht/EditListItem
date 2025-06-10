@@ -1,8 +1,9 @@
 import { IPlanungsItem } from '../types/IPlanungsItem';
 import { ISpItem } from '../types/ISpItem';
+import { IMapper } from './IMapper';
 
-export class Mapper {
-    public static SpToPlanung(spItem: ISpItem): IPlanungsItem {
+export class Mapper implements IMapper {
+    public SpToPlanung(spItem: ISpItem): IPlanungsItem {
         return {
             id: spItem.Id,
             thema: spItem.Title,
@@ -14,14 +15,15 @@ export class Mapper {
         };
     }
 
-    public static PlanungToSp(planungsItem: IPlanungsItem): ISpItem {
+    public PlanungToSp(planungsItem: IPlanungsItem): ISpItem {
+        const {id, thema, start, ende, verpflegung, verpflegungAnzahl} = planungsItem;
         return {
-            Id: planungsItem.id,
-            Title: planungsItem.thema,
-            Beginn: planungsItem.start.toISOString(),
-            Ende: planungsItem.ende.toISOString(),
-            Verpflegung: planungsItem.verpflegung,
-            AnzahlEssen: planungsItem.verpflegungAnzahl
+            Id: id,
+            Title: thema,
+            Beginn: start ? start.toISOString() : '',
+            Ende: ende ? ende.toISOString() : '',
+            Verpflegung: verpflegung,
+            AnzahlEssen: verpflegungAnzahl
         };
     }
 }

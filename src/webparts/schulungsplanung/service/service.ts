@@ -7,18 +7,21 @@ import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { IPlanungsItem } from '../types/IPlanungsItem';
 import { Mapper } from './Mapper';
 import { ISpItem } from '../types/ISpItem';
+import { IMapper } from './IMapper';
 
 export class Service implements IService {
+    private _mapper: IMapper;
     constructor(context: WebPartContext) {
         sp.setup(
             {
                 spfxContext: context
             }
         );
+        this._mapper = new Mapper();
     }
 
-    public async writeListItem(listId: string, item: IPlanungsItem): Promise<boolean> {
-        const spItem: ISpItem = Mapper.PlanungToSp(item);
+    public async saveListItem(listId: string, item: IPlanungsItem): Promise<boolean> {
+        const spItem: ISpItem = this._mapper.PlanungToSp(item);
         if (spItem.Id && spItem.Id > 0) {
             // Update existing item}
             return sp.web.lists.getById(listId).items.getById(spItem.Id).update(spItem)
@@ -52,7 +55,7 @@ export class Service implements IService {
             .getById(itemId)
             .get<ISpItem>();
         if (item) {
-            const planungsItem: IPlanungsItem = Mapper.SpToPlanung(item);
+            const planungsItem: IPlanungsItem = this._mapper.SpToPlanung(item);
             return planungsItem;
         } else {
             return undefined;
