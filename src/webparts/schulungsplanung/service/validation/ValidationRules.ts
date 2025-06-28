@@ -1,28 +1,31 @@
-import { IValidationRule } from "./IValidationRule";
+import { IValidationRule } from './IValidationRule';
 
-export const ValidationRules = {
+// tslint:disable-next-line:variable-name
+export const ValidationRules: { [key: string]: (...args: string[]) => IValidationRule } = {
     dateAfter: (targetFieldName: string, message: string): IValidationRule => ({
-        validate: (value: Date, allValues: { [key: string]: any }) => {
-            const targetDate = allValues[targetFieldName];
-            if (!value || !targetDate) return { isValid: true, message: '' };
+        validate: (value: {}, allValues: { [key: string]: {} }) => {
+            const targetDate: {} = allValues[targetFieldName];
+            if (!value || !targetDate) {
+                return { isValid: true, message: '' };
+            }
 
             return {
-                isValid: value > targetDate,
-                message: value <= targetDate ? message : ''
+                isValid: (value as Date) > (targetDate as Date),
+                message: (value as Date) <= (targetDate as Date) ? message : ''
             };
         }
     }),
 
     required: (message: string): IValidationRule => ({
-        validate: (value: any) => ({
-            isValid: value != null && value !== '',
+        validate: (value: {}) => ({
+            isValid: value !== undefined && value !== '',
             message: !value ? message : ''
         })
     }),
 
     requiredDependsOn: (dependsOnFieldName: string, message: string): IValidationRule => ({
-        validate: (value: any, allValues: {[key: string]: any}) => {
-            const dependsOnValue = allValues[dependsOnFieldName];
+        validate: (value: {}, allValues: {[key: string]: {}}) => {
+            const dependsOnValue: {} = allValues[dependsOnFieldName];
             if (dependsOnValue) {
                 return {
                     isValid: !!value,

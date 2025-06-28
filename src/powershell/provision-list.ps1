@@ -3,12 +3,14 @@ param(
     [string]$webUrl
 )
 
+# Verwendet SharePointPnPPowershell2019
+
 # Connect to SharePoint site
 Connect-PnPOnline -Url $webUrl -CurrentCredentials
 
 try {
     # Create the list
-    $listName = "Planung"
+    $listName = "Planung4"
     
     # Check if list already exists
     $existingList = Get-PnPList -Identity $listName -ErrorAction SilentlyContinue
@@ -22,12 +24,14 @@ try {
     # Rename the title column of the list to 'Thema'
     Set-PnPField -List $listName -Identity "Title" -Values @{Title="Thema"}
 
-    # Enable the list to appear in Quick Launch navigation
+    # Enable the list to appear in Quick Launch navigation and diable attachments
     $list = Get-PnPList -Identity $listName
     $list.OnQuickLaunch = $true
+    $list.EnableAttachments = $false
     $list.Update()
     Invoke-PnPQuery
     Write-Host "Enabled list in Quick Launch navigation" -ForegroundColor Green
+    Write-Host "Disabled attachments for the list" -ForegroundColor Green
     
     # Define fields to add
     $fieldsToAdd = @(
@@ -41,7 +45,7 @@ try {
     foreach ($field in $fieldsToAdd) {
         $existingField = Get-PnPField -List $listName -Identity $field.InternalName -ErrorAction SilentlyContinue
         if ($null -eq $existingField) {
-            Add-PnPField -List $listName -DisplayName $field.DisplayName -InternalName $field.InternalName -Type $field.Type
+            [void](Add-PnPField -List $listName -DisplayName $field.DisplayName -InternalName $field.InternalName -Type $field.Type)
             Write-Host "Added field: $($field.DisplayName)" -ForegroundColor Green
         } else {
             Write-Host "Field '$($field.DisplayName)' already exists, skipping" -ForegroundColor Yellow
@@ -52,7 +56,7 @@ try {
         
     # Update default view to include new fields
     $defaultView = Get-PnPView -List $listName | Where-Object { $_.DefaultView -eq $true }
-    Set-PnPView -List $listName -Identity $defaultView.Id -Fields @("Title", "Beginn", "Ende", "Verpflegung", "AnzahlEssen")
+    [void](Set-PnPView -List $listName -Identity $defaultView.Id -Fields @("Title", "Beginn", "Ende", "Verpflegung", "AnzahlEssen"))
     
     Write-Host "Updated default view" -ForegroundColor Green
     Write-Host "List provisioning completed successfully!" -ForegroundColor Green
